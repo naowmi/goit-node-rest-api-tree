@@ -57,9 +57,10 @@ export const updateContact = async (req, res, next) => {
         }
    
       const contact = await Contact.findByIdAndUpdate(id, updateContact)
-      if (contact.id !== id) {
-        return res.status(404).send({"message": "Not Found"})
-     }
+
+      if (!contact) {
+        return res.status(404).send({"message": "Contact Not Found"});
+    }
       res.status(200).send(contact);
     } catch (error) {
        next(error) 
@@ -74,9 +75,9 @@ export const updateStatusContact = async (req, res, next) => {
         return res.status(400).send({"message": "Body must have a 'favorite' field"})
      }
      const contact = await Contact.findByIdAndUpdate(id, updateContact);
-     if (contact.id !== id) {
-        return res.status(404).send({"message": "Not Found"})
-     }
+     if (!contact) {
+        return res.status(404).send({"message": "Contact Not Found"});
+    }
      res.status(200).send(contact);
     } catch (error) {
        next(error)
