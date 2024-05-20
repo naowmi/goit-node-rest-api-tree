@@ -50,7 +50,7 @@ export const createContact = async (req, res) => {
 
 };
 
-export const updateContact = async (req, res) => {
+export const updateContact = async (req, res, next) => {
     try {
         const { id } = req.params;
         const updateContact = req.body
@@ -59,13 +59,17 @@ export const updateContact = async (req, res) => {
         }
    
       const contact = await Contact.findByIdAndUpdate(id, updateContact)
+
+      if (!contact) {
+        return res.status(404).send({"message": "Contact Not Found"});
+    }
       res.status(200).send(contact);
     } catch (error) {
         res.status(404).send({message: error.message}) 
     }
 };
 
-export const updateStatusContact = async (req, res) => {
+export const updateStatusContact = async (req, res, next) => {
     try {
      const {id} = req.params;  
      const updateContact = req.body
@@ -73,6 +77,9 @@ export const updateStatusContact = async (req, res) => {
         return res.status(400).send({message: "Body must have a 'favorite' field"})
      }
      const contact = await Contact.findByIdAndUpdate(id, updateContact);
+     if (!contact) {
+        return res.status(404).send({"message": "Contact Not Found"});
+    }
      res.status(200).send(contact);
     } catch (error) {
        res.status(404).send({message: error.message}) 
