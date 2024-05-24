@@ -1,6 +1,10 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import gravatar from "gravatar";
+import jimp from "jimp";
+import * as fs from "node:fs/promises";
+import path from "node:path";
 
 export const register = async (req, res, next) => {
     const { email, password } = req.body;
@@ -11,9 +15,12 @@ export const register = async (req, res, next) => {
         res.status(409).send({message: "Email in use"});
        }
        const passwordHash = await bcrypt.hash(password, 10);
+       const generatedGravatar = gravatar.url(emailInLowerCase);
+
        await User.create({
         email: emailInLowerCase,
         password: passwordHash,
+        avatarURL: `http:${generatedGravatar}`,
     });
        res.status(201).send({message: "Registration successfully"});
     } catch (error) {
@@ -61,5 +68,22 @@ export const getUser = async (req, res, next) => {
         res.status(200).send({ email, subscription });
     } catch(error) {
         next(error)
+    }
+}
+export const updateAvatar = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).send("Please select the avatar")
+        }
+
+        const userAvatar = await jimp.read(req.file.path);
+        await userAvatar.resize(250, 250).writeAsync(req.file.path);
+        fs.rename(req.file.path, path.resolve("public/avatars", req.file.filename))
+
+       const user = await User.findByIdAndUpdate(req.user.id, {avatarURL: req.file.filename}, { new: true });
+
+       res.status(200).send({ avatarURL: `/avatars/${user.avatarURL}` });
+    } catch (error) {
+        res.status(401).send({message: "Not authorized"})
     }
 }
