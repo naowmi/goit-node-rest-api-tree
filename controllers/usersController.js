@@ -73,7 +73,7 @@ export const getUser = async (req, res, next) => {
 export const updateAvatar = async (req, res, next) => {
     try {
         if (!req.file) {
-            return res.status(400).send("Please select the avatar")
+            return res.status(400).send({message: "Please select the avatar"})
         }
 
         const userAvatar = await jimp.read(req.file.path);
